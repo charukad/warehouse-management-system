@@ -1,5 +1,9 @@
+// server/middleware/errorHandler.js (updated)
+const logger = require("../utils/logger");
+
 const errorHandler = (err, req, res, next) => {
-  console.error(err.stack);
+  // Log the error with details
+  logger.error(`${req.method} ${req.originalUrl}`, err);
 
   // Default error status and message
   let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
@@ -25,10 +29,22 @@ const errorHandler = (err, req, res, next) => {
       .join(", ");
   }
 
+  // JSON Web Token error
+  if (err.name === "JsonWebTokenError") {
+    statusCode = 401;
+    message = "Invalid token. Please log in again.";
+  }
+
+  // Token expired error
+  if (err.name === "TokenExpiredError") {
+    statusCode = 401;
+    message = "Your session has expired. Please log in again.";
+  }
+
   res.status(statusCode).json({
     success: false,
     message,
-    stack: process.env.NODE_ENV === "production" ? "🥞" : err.stack,
+    stack: process.env.NODE_ENV === "production" ? undefined : err.stack,
   });
 };
 
