@@ -1,26 +1,34 @@
-require("dotenv").config();
-const app = require("./app");
+// server/index.js
+const express = require("express");
+const http = require("http");
 const connectDB = require("./config/database");
+const { initializeSocket } = require("./config/socket");
+const routes = require("./routes");
+const cors = require("cors");
+require("dotenv").config();
 
-// Get port from environment variables or use default
-const PORT = process.env.PORT || 5000;
+// Initialize Express app
+const app = express();
+
+// Create HTTP server
+const server = http.createServer(app);
+
+// Initialize Socket.io
+initializeSocket(server);
 
 // Connect to MongoDB
 connectDB();
 
-// Start the server
-const server = app.listen(PORT, () => {
-  console.log(`Server running in development mode on port ${PORT}`);
-});
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Handle unhandled promise rejections
-process.on("unhandledRejection", (err) => {
-  console.log(`Error: ${err.message}`);
-  // Close server & exit process
-  server.close(() => process.exit(1));
-});
-process.on("uncaughtException", (err) => {
-  console.error("UNCAUGHT EXCEPTION! 💥 Shutting down...");
-  console.error(err.name, err.message, err.stack);
-  process.exit(1);
+// Routes
+app.use("/api", routes);
+
+// Start server
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

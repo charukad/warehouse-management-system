@@ -5,17 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   BarChart,
   Bar,
-  LineChart,
-  Line,
   PieChart,
   Pie,
   XAxis,
@@ -66,7 +57,7 @@ const WarehouseDashboard = () => {
   }
 
   // Format data for charts
-  const formatReturnSummaryData = () => {
+  const formatReturnsSummaryData = () => {
     if (
       !dashboardData?.returnsSummary ||
       dashboardData.returnsSummary.length === 0
@@ -86,7 +77,7 @@ const WarehouseDashboard = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Warehouse Manager Dashboard</h1>
+      <h1 className="text-2xl font-bold mb-6">Warehouse Dashboard</h1>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -131,76 +122,18 @@ const WarehouseDashboard = () => {
         </Card>
       </div>
 
-      {/* Distribution Summary */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Distribution Summary (Last 30 Days)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <p className="text-lg font-semibold">Total Distributed</p>
-              <p className="text-3xl font-bold">
-                $
-                {dashboardData?.distributionSummary?.totalDistributed?.toFixed(
-                  2
-                ) || "0.00"}
-              </p>
-              <p className="text-gray-500">
-                From{" "}
-                {dashboardData?.distributionSummary?.distributionCount || 0}{" "}
-                distributions
-              </p>
-            </div>
-
-            <div>
-              <p className="text-lg font-semibold">Return Analysis</p>
-              <div className="h-40">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={formatReturnSummaryData()}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={60}
-                      fill="#8884d8"
-                      dataKey="value"
-                      nameKey="name"
-                      label={({ name, percent }) =>
-                        `${name} ${(percent * 100).toFixed(0)}%`
-                      }
-                    >
-                      {formatReturnSummaryData().map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Product Performance */}
-      <Tabs defaultValue="top-distributed" className="mb-6">
+      {/* Tabs for Different Analytics */}
+      <Tabs defaultValue="distribution" className="mb-6">
         <TabsList>
-          <TabsTrigger value="top-distributed">
-            Top Distributed Products
-          </TabsTrigger>
-          <TabsTrigger value="high-return">High Return Products</TabsTrigger>
+          <TabsTrigger value="distribution">Distribution</TabsTrigger>
+          <TabsTrigger value="returns">Returns</TabsTrigger>
+          <TabsTrigger value="inventory">Inventory</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="top-distributed" className="mt-4">
+        <TabsContent value="distribution" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Most Frequently Distributed Products</CardTitle>
+              <CardTitle>Top Distributed Products (Last 30 Days)</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-80">
@@ -231,7 +164,9 @@ const WarehouseDashboard = () => {
               </div>
 
               <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-2">Detailed List</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  Distribution Details
+                </h3>
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
@@ -274,85 +209,161 @@ const WarehouseDashboard = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="high-return" className="mt-4">
+        <TabsContent value="returns" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Products with High Return Rates</CardTitle>
+              <CardTitle>Returns Analysis</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={dashboardData?.highReturnProducts || []}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="productName"
-                      tick={{ fontSize: 12 }}
-                      interval={0}
-                      angle={-45}
-                      textAnchor="end"
-                      height={70}
-                    />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar
-                      dataKey="returnedQuantity"
-                      fill="#FF8042"
-                      name="Quantity Returned"
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-2">Detailed List</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="border p-2 text-left">Product Name</th>
-                        <th className="border p-2 text-right">
-                          Quantity Returned
-                        </th>
-                        <th className="border p-2 text-center">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dashboardData?.highReturnProducts?.map(
-                        (product, index) => (
-                          <tr
-                            key={index}
-                            className={
-                              index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                            }
-                          >
-                            <td className="border p-2">
-                              {product.productName}
-                            </td>
-                            <td className="border p-2 text-right">
-                              {product.returnedQuantity}
-                            </td>
-                            <td className="border p-2 text-center">
-                              <Button variant="outline" size="sm">
-                                View Details
-                              </Button>
-                            </td>
-                          </tr>
-                        )
-                      )}
-                    </tbody>
-                  </table>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">
+                    Returns by Type
+                  </h3>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={formatReturnsSummaryData()}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                          nameKey="name"
+                          label={({ name, percent }) =>
+                            `${name} ${(percent * 100).toFixed(0)}%`
+                          }
+                        >
+                          {formatReturnsSummaryData().map((entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={COLORS[index % COLORS.length]}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          formatter={(value) => `$${value.toFixed(2)}`}
+                        />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">
+                    Products with High Returns
+                  </h3>
+                  <div className="overflow-y-auto max-h-80">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="border p-2 text-left">Product</th>
+                          <th className="border p-2 text-right">
+                            Returned Quantity
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dashboardData?.highReturnProducts?.map(
+                          (product, index) => (
+                            <tr
+                              key={index}
+                              className={
+                                index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                              }
+                            >
+                              <td className="border p-2">
+                                {product.productName}
+                              </td>
+                              <td className="border p-2 text-right">
+                                {product.returnedQuantity}
+                              </td>
+                            </tr>
+                          )
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="inventory" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Inventory Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="border p-2 text-left">Product</th>
+                      <th className="border p-2 text-right">Current Stock</th>
+                      <th className="border p-2 text-right">
+                        Minimum Threshold
+                      </th>
+                      <th className="border p-2 text-right">
+                        Reorder Quantity
+                      </th>
+                      <th className="border p-2 text-center">Status</th>
+                      <th className="border p-2 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* Normally you'd use an inventory list here, but for demonstration we'll use the alerts */}
+                    {dashboardData?.inventoryAlerts?.map((item, index) => (
+                      <tr
+                        key={index}
+                        className={`${
+                          index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                        } ${
+                          item.alertLevel === "critical"
+                            ? "text-red-600"
+                            : "text-yellow-600"
+                        }`}
+                      >
+                        <td className="border p-2">{item.productName}</td>
+                        <td className="border p-2 text-right">
+                          {item.currentStock}
+                        </td>
+                        <td className="border p-2 text-right">
+                          {item.minimumThreshold}
+                        </td>
+                        <td className="border p-2 text-right">
+                          {item.reorderQuantity}
+                        </td>
+                        <td
+                          className={`border p-2 text-center font-semibold ${
+                            item.alertLevel === "critical"
+                              ? "text-red-600"
+                              : "text-yellow-600"
+                          }`}
+                        >
+                          {item.alertLevel === "critical"
+                            ? "CRITICAL"
+                            : "WARNING"}
+                        </td>
+                        <td className="border p-2 text-center">
+                          <Button variant="outline" size="sm">
+                            Update Stock
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Quick Actions */}
       {/* Quick Actions */}
       <Card>
         <CardHeader>

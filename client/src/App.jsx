@@ -1,4 +1,5 @@
 // client/src/App.jsx
+
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -6,158 +7,192 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
-// Auth Pages
+import { AuthProvider } from "./contexts/AuthContext";
+import { UIProvider } from "./contexts/UIContext";
+import MainLayout from "./layouts/MainLayout";
+import AuthLayout from "./layouts/AuthLayout";
+import Dashboard from "./pages/Dashboard";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-import ErrorBoundary from "./components/common/ErrorBoundary";
-
-// Placeholder Dashboard Components (you'll implement these later)
-const OwnerDashboard = () => <div className="p-6">Owner Dashboard</div>;
-const WarehouseDashboard = () => (
-  <div className="p-6">Warehouse Manager Dashboard</div>
-);
-const SalesmanDashboard = () => <div className="p-6">Salesman Dashboard</div>;
-const ShopDashboard = () => <div className="p-6">Shop Dashboard</div>;
-const Unauthorized = () => (
-  <div className="flex h-screen items-center justify-center bg-gray-100">
-    <div className="text-center p-8 bg-white rounded-lg shadow-md max-w-md">
-      <h1 className="text-2xl font-bold text-red-600 mb-4">
-        Unauthorized Access
-      </h1>
-      <p className="text-gray-700 mb-4">
-        You don't have permission to access this page. Please contact your
-        administrator if you believe this is an error.
-      </p>
-      <button
-        onClick={() => window.history.back()}
-        className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700"
-      >
-        Go Back
-      </button>
-    </div>
-  </div>
-);
-
-// Role-specific dashboard routing
-const DashboardRouter = () => {
-  const { user } = useAuth();
-
-  if (!user) return null;
-
-  switch (user.role) {
-    case "owner":
-      return <Navigate to="/owner/dashboard" replace />;
-    case "warehouse_manager":
-      return <Navigate to="/warehouse/dashboard" replace />;
-    case "salesman":
-      return <Navigate to="/salesman/dashboard" replace />;
-    case "shop":
-      return <Navigate to="/shop/dashboard" replace />;
-    default:
-      return <Navigate to="/login" replace />;
-  }
-};
-
-// Not Found Page
-const NotFound = () => (
-  <div className="flex h-screen items-center justify-center bg-gray-100">
-    <div className="text-center p-8 bg-white rounded-lg shadow-md max-w-md">
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">
-        404 - Page Not Found
-      </h1>
-      <p className="text-gray-700 mb-4">
-        The page you are looking for doesn't exist or has been moved.
-      </p>
-      <button
-        onClick={() => (window.location.href = "/")}
-        className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700"
-      >
-        Go to Home
-      </button>
-    </div>
-  </div>
-);
-
-function AppRoutes() {
-  return (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-
-      {/* Dashboard Route - Redirects based on user role */}
-      <Route
-        path="/dashboard"
-        element={<ProtectedRoute element={<DashboardRouter />} />}
-      />
-
-      {/* Owner Routes */}
-      <Route
-        path="/owner/dashboard"
-        element={
-          <ProtectedRoute
-            element={<OwnerDashboard />}
-            allowedRoles={["owner"]}
-          />
-        }
-      />
-
-      {/* Warehouse Manager Routes */}
-      <Route
-        path="/warehouse/dashboard"
-        element={
-          <ProtectedRoute
-            element={<WarehouseDashboard />}
-            allowedRoles={["warehouse_manager"]}
-          />
-        }
-      />
-
-      {/* Salesman Routes */}
-      <Route
-        path="/salesman/dashboard"
-        element={
-          <ProtectedRoute
-            element={<SalesmanDashboard />}
-            allowedRoles={["salesman"]}
-          />
-        }
-      />
-
-      {/* Shop Routes */}
-      <Route
-        path="/shop/dashboard"
-        element={
-          <ProtectedRoute element={<ShopDashboard />} allowedRoles={["shop"]} />
-        }
-      />
-
-      {/* Unauthorized Access */}
-      <Route path="/unauthorized" element={<Unauthorized />} />
-
-      {/* Root Route - Redirect to login or dashboard */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-      {/* 404 Route */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  );
-}
+import Reports from "./pages/owner/Reports";
+import UserManagement from "./pages/owner/UserManagement";
+import ProductManagement from "./pages/owner/ProductManagement";
+import InventoryManagement from "./pages/warehouse/Inventory";
+import Distribution from "./pages/warehouse/Distribution";
+import Returns from "./pages/warehouse/Returns";
+import ShopManagement from "./pages/salesman/Shops";
+import Deliveries from "./pages/salesman/Deliveries";
+import SalesmanInventory from "./pages/salesman/Inventory";
+import ShopOrders from "./pages/shop/Orders";
+import ShopReturns from "./pages/shop/Returns";
+import ShopProfile from "./pages/shop/Profile";
+import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/common/ProtectedRoute";
 
 function App() {
   return (
-    <ErrorBoundary>
+    <Router>
       <AuthProvider>
-        <Router>
-          <AppRoutes />
-        </Router>
+        <UIProvider>
+          <Routes>
+            {/* Auth Routes */}
+            <Route element={<AuthLayout />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+            </Route>
+            {/* Main App Routes */}
+            <Route
+              element={
+                <ProtectedRoute>
+                  <MainLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+
+              {/* Owner Routes */}
+              <Route
+                path="/reports"
+                element={
+                  <ProtectedRoute allowedRoles={["owner"]}>
+                    <Reports />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/users"
+                element={
+                  <ProtectedRoute allowedRoles={["owner"]}>
+                    <UserManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/products"
+                element={
+                  <ProtectedRoute allowedRoles={["owner"]}>
+                    <ProductManagement />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Warehouse Manager Routes */}
+              <Route
+                path="/inventory"
+                element={
+                  <ProtectedRoute allowedRoles={["owner", "warehouse_manager"]}>
+                    <InventoryManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/distribution"
+                element={
+                  <ProtectedRoute allowedRoles={["warehouse_manager"]}>
+                    <Distribution />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/returns/warehouse"
+                element={
+                  <ProtectedRoute allowedRoles={["warehouse_manager"]}>
+                    <Returns />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Salesman Routes */}
+              <Route
+                path="/shops"
+                element={
+                  <ProtectedRoute allowedRoles={["salesman"]}>
+                    <ShopManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/deliveries"
+                element={
+                  <ProtectedRoute allowedRoles={["salesman"]}>
+                    <Deliveries />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/inventory/salesman"
+                element={
+                  <ProtectedRoute allowedRoles={["salesman"]}>
+                    <SalesmanInventory />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Shop Routes */}
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute allowedRoles={["shop"]}>
+                    <ShopOrders />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/returns/shop"
+                element={
+                  <ProtectedRoute allowedRoles={["shop"]}>
+                    <ShopReturns />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute allowedRoles={["shop"]}>
+                    <ShopProfile />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
+            // Update your routes in app.js or router file // Before (with
+            individual routes)
+            <Route path="/owner/dashboard" element={<OwnerDashboard />} />
+            <Route
+              path="/warehouse/dashboard"
+              element={<WarehouseDashboard />}
+            />
+            <Route path="/salesman/dashboard" element={<SalesmanDashboard />} />
+            <Route path="/shop/dashboard" element={<ShopDashboard />} />
+            // After (with central dashboard routing)
+            <Route path="/dashboard" element={<Dashboard />} />
+            // Update your routes configuration // Add these new routes to your
+            existing routes
+            <Route
+              path="/owner/advanced-analytics"
+              element={
+                <ProtectedRoute allowedRoles={["owner"]}>
+                  <AdvancedAnalytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/owner/shops-map"
+              element={
+                <ProtectedRoute allowedRoles={["owner"]}>
+                  <ShopsMap />
+                </ProtectedRoute>
+              }
+            />
+            {/* 404 Route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </UIProvider>
       </AuthProvider>
-    </ErrorBoundary>
+    </Router>
   );
 }
 

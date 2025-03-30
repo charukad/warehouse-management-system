@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { authenticate } = require("../middleware/auth");
 const checkRole = require("../middleware/roleCheck");
+const { cacheMiddleware, invalidateCache } = require("../middleware/cache");
 const dashboardController = require("../controllers/dashboardController");
 
 // Get owner dashboard data - accessible to owner only
@@ -59,6 +60,37 @@ router.get(
   authenticate,
   checkRole("owner"),
   dashboardController.getSalesOverview
+);
+
+router.get(
+  "/sales-summary",
+  auth,
+  cacheMiddleware(900),
+  dashboardController.getSalesSummary
+);
+
+// Get top products with 1-hour cache
+router.get(
+  "/top-products",
+  auth,
+  cacheMiddleware(3600),
+  dashboardController.getTopProducts
+);
+
+// Get salesman performance with 30-minute cache
+router.get(
+  "/salesman-performance",
+  auth,
+  cacheMiddleware(1800),
+  dashboardController.getSalesmanPerformance
+);
+
+// Add cache invalidation when new sales are recorded
+router.post(
+  "/sales",
+  auth,
+  dashboardController.recordSale,
+  invalidateCache("api:/dashboard/sales*")
 );
 
 module.exports = router;

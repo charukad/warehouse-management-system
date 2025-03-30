@@ -89,6 +89,23 @@ const ShopSchema = new mongoose.Schema(
 );
 
 // Create a geospatial index for location-based queries
-ShopSchema.index({ location: "2dsphere" });
+shopSchema.index(
+  {
+    shop_name: "text",
+    address: "text",
+    contact_person: "text",
+    phone_number: "text",
+  },
+  {
+    weights: {
+      shop_name: 10,
+      contact_person: 5,
+      phone_number: 5,
+      address: 1,
+    },
+  }
+);
+
+const Shop = mongoose.model("Shop", shopSchema);
 
 module.exports = mongoose.model("Shop", ShopSchema);
