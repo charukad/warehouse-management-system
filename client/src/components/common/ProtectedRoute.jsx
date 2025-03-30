@@ -10,7 +10,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const location = useLocation();
 
   if (loading) {
-    return <Loader />;
+    return <Loader text="Authenticating..." />;
   }
 
   if (!user) {
@@ -21,6 +21,10 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
     // Redirect to dashboard if user doesn't have the required role
     return <Navigate to="/dashboard" replace />;
+  }
+  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+    // Redirect to unauthorized page or dashboard
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return children;

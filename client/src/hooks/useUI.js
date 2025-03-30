@@ -1,14 +1,49 @@
 // client/src/hooks/useUI.js
-
-import { useContext } from "react";
-import { UIContext } from "../contexts/UIContext";
+import { useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  toggleSidebar,
+  setSidebarOpen,
+  toggleDarkMode,
+  setSearchQuery,
+} from "../store/slices/uiSlice";
 
 export const useUI = () => {
-  const context = useContext(UIContext);
+  const dispatch = useDispatch();
+  const { sidebarOpen, darkMode, searchQuery, isOnline } = useSelector(
+    (state) => state.ui
+  );
 
-  if (context === undefined) {
-    throw new Error("useUI must be used within a UIProvider");
-  }
+  const handleToggleSidebar = useCallback(() => {
+    dispatch(toggleSidebar());
+  }, [dispatch]);
 
-  return context;
+  const handleSetSidebarOpen = useCallback(
+    (isOpen) => {
+      dispatch(setSidebarOpen(isOpen));
+    },
+    [dispatch]
+  );
+
+  const handleToggleDarkMode = useCallback(() => {
+    dispatch(toggleDarkMode());
+  }, [dispatch]);
+
+  const handleSetSearchQuery = useCallback(
+    (query) => {
+      dispatch(setSearchQuery(query));
+    },
+    [dispatch]
+  );
+
+  return {
+    sidebarOpen,
+    darkMode,
+    searchQuery,
+    isOnline,
+    toggleSidebar: handleToggleSidebar,
+    setSidebarOpen: handleSetSidebarOpen,
+    toggleDarkMode: handleToggleDarkMode,
+    setSearchQuery: handleSetSearchQuery,
+  };
 };

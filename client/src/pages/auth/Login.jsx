@@ -14,7 +14,12 @@ const schema = yup.object().shape({
 });
 
 const Login = () => {
-  const { login, isAuthenticated, error: authError } = useAuth();
+  const {
+    login,
+    isAuthenticated,
+    error: authError,
+    getDashboardUrl,
+  } = useAuth();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -40,23 +45,39 @@ const Login = () => {
     if (expired === "true") {
       setError("Your session has expired. Please log in again.");
     }
+  }, [location.search]);
 
-    // Clear the stored redirect path once used
+  // Handle successful authentication
+  useEffect(() => {
     if (isAuthenticated) {
+      console.log("User is authenticated, preparing to redirect...");
       localStorage.removeItem("redirectAfterLogin");
-      navigate(redirectPath);
+
+      // Get the appropriate dashboard URL based on user role
+      const dashboardUrl = getDashboardUrl ? getDashboardUrl() : redirectPath;
+      console.log("Redirecting to:", dashboardUrl);
+
+      // Add a small delay to ensure context updates are complete
+      setTimeout(() => {
+        navigate(dashboardUrl);
+      }, 100);
     }
-  }, [isAuthenticated, navigate, location.search, redirectPath]);
+  }, [isAuthenticated, navigate, redirectPath, getDashboardUrl]);
 
   // Handle form submission
   const onSubmit = async (data) => {
     try {
       setIsLoading(true);
       setError("");
-      await login(data);
+      console.log("Submitting login form with username:", data.username);
 
-      // Redirect will happen automatically due to the useEffect
+      // Call the login function from the auth context
+      await login(data);
+      console.log("Login completed successfully");
+
+      // Redirect will happen in the useEffect when isAuthenticated updates
     } catch (err) {
+      console.error("Login error caught in component:", err);
       setError(
         err.customMessage || "Login failed. Please check your credentials."
       );

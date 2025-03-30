@@ -5,6 +5,13 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const path = require("path");
 const fs = require("fs");
+const dotenv = require("dotenv");
+
+// Load environment variables
+dotenv.config();
+
+// Import the database connection
+const connectDB = require("./config/database");
 
 // Import middlewares
 const errorHandler = require("./middleware/errorHandler");
@@ -13,16 +20,14 @@ const errorHandler = require("./middleware/errorHandler");
 const app = express();
 
 // Setup request logging
-const accessLogStream = fs.createWriteStream(
-  path.join(__dirname, "logs", "access.log"),
-  { flags: "a" }
-);
-
-// Create logs directory if it doesn't exist
 const logsDir = path.join(__dirname, "logs");
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir);
 }
+
+const accessLogStream = fs.createWriteStream(path.join(logsDir, "access.log"), {
+  flags: "a",
+});
 
 // Middleware
 app.use(helmet()); // Security headers
@@ -33,20 +38,43 @@ app.use(morgan("combined", { stream: accessLogStream })); // Request logging
 
 // Health check route
 app.get("/api/health", (req, res) => {
-  res.status(200).json({ status: "ok", message: "Server is running" });
+  const dbStatus =
+    mongoose.connection.readyState === 1 ? "connected" : "disconnected";
+  res.status(200).json({
+    status: "ok",
+    message: "Server is running",
+    database: dbStatus,
+  });
 });
 
-// Import and use API routes
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/users", require("./routes/users"));
-app.use("/api/products", require("./routes/products"));
-app.use("/api/inventory", require("./routes/inventory"));
-app.use("/api/distribution", require("./routes/distribution"));
-app.use("/api/shops", require("./routes/shops"));
-app.use("/api/orders", require("./routes/orders"));
-app.use("/api/returns", require("./routes/returns"));
-app.use("/api/reports", require("./routes/reports"));
-app.use("/api/dashboard", require("./routes/dashboard"));
+// Helper function to safely load route modules
+const safeRequire = (routePath) => {
+  try {
+    const route = require(routePath);
+    if (!route || typeof route !== "function") {
+      console.error(
+        `Warning: Route module ${routePath} does not export a function`
+      );
+      return express.Router(); // Return empty router as fallback
+    }
+    return route;
+  } catch (error) {
+    console.error(`Error loading route module ${routePath}:`, error.message);
+    return express.Router(); // Return empty router as fallback
+  }
+};
+
+// Import and use API routes - with safer route loading
+app.use("/api/auth", safeRequire("./routes/auth"));
+app.use("/api/users", safeRequire("./routes/users"));
+app.use("/api/products", safeRequire("./routes/products"));
+app.use("/api/inventory", safeRequire("./routes/inventory"));
+app.use("/api/distribution", safeRequire("./routes/distribution"));
+app.use("/api/shops", safeRequire("./routes/shops"));
+app.use("/api/orders", safeRequire("./routes/orders"));
+app.use("/api/returns", safeRequire("./routes/returns"));
+app.use("/api/reports", safeRequire("./routes/reports"));
+app.use("/api/dashboard", safeRequire("./routes/dashboard"));
 
 // Serve static files from uploads directory
 app.use("/api/uploads", express.static(path.join(__dirname, "uploads")));
@@ -63,4 +91,30 @@ if (process.env.NODE_ENV === "production") {
 // Error handling middleware
 app.use(errorHandler);
 
-module.exports = app;
+// Start the server if this file is run directly
+if (require.main === module) {
+  // Connect to MongoDB first, then start the Express server
+  connectDB()
+    .then(() => {
+      const PORT = process.env.PORT || 5008;
+      app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+        console.log(
+          `Health check available at: http://localhost:${PORT}/api/health`
+        );
+        console.log(
+          `API endpoints available at: http://localhost:${PORT}/api/...`
+        );
+      });
+    })
+    .catch((err) => {
+      console.error("Failed to connect to MongoDB, server not started", err);
+    });
+} else {
+  // When imported (not directly run), still connect to the database
+  // This is useful for testing scenarios
+  connectDB().catch((err) => console.error("Database connection error:", err));
+
+  // Export the app
+  module.exports = app;
+}

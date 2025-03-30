@@ -1,116 +1,158 @@
 // client/src/services/dashboardService.js
+// Create a dashboard service for fetching analytics data
 
-import axios from "axios";
+const getSalesSummary = async (period = "month") => {
+  // Mock data for sales summary
+  const data = {
+    totalSales: 125850,
+    totalOrders: 320,
+    averageOrderValue: 393.28,
+    previousPeriod: {
+      totalSales: 112400,
+      totalOrders: 295,
+      averageOrderValue: 380.67,
+    },
+    percentChange: {
+      totalSales: 11.96,
+      totalOrders: 8.47,
+      averageOrderValue: 3.31,
+    },
+  };
 
-// Create axios instance with base URL
-const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+  return { data };
+};
 
-// Add request interceptor to inject the auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+const getSalesmanPerformance = async (period = "month") => {
+  // Mock data for salesman performance
+  const data = [
+    {
+      id: "1",
+      name: "John Doe",
+      sales: 45200,
+      orders: 112,
+      shops: 18,
+      returnRate: 3.2,
+    },
+    {
+      id: "2",
+      name: "Jane Smith",
+      sales: 38750,
+      orders: 98,
+      shops: 15,
+      returnRate: 2.5,
+    },
+    {
+      id: "3",
+      name: "Robert Johnson",
+      sales: 41900,
+      orders: 110,
+      shops: 16,
+      returnRate: 4.1,
+    },
+  ];
+
+  return { data };
+};
+
+const getTopProducts = async (limit = 5) => {
+  // Mock data for top products
+  const data = [
+    {
+      id: "1",
+      name: "Sweet Treat A",
+      sales: 28500,
+      units: 114,
+      profit: 11400,
+    },
+    {
+      id: "2",
+      name: "Sweet Treat B",
+      sales: 23400,
+      units: 78,
+      profit: 9360,
+    },
+    {
+      id: "3",
+      name: "Third Party Sweet",
+      sales: 21350,
+      units: 61,
+      profit: 7900,
+    },
+    {
+      id: "4",
+      name: "Chocolate Delight",
+      sales: 18700,
+      units: 55,
+      profit: 6545,
+    },
+    {
+      id: "5",
+      name: "Vanilla Dream",
+      sales: 15800,
+      units: 53,
+      profit: 5530,
+    },
+  ];
+
+  return { data };
+};
+
+const getInventorySummary = async () => {
+  // Mock data for inventory summary
+  const data = {
+    totalProducts: 25,
+    totalStock: 3250,
+    lowStockItems: 4,
+    outOfStockItems: 1,
+    stockValue: 325000,
+  };
+
+  return { data };
+};
+
+const getSalesOverTime = async (period = "year", interval = "month") => {
+  // Mock data for sales over time
+  let data = [];
+
+  if (interval === "day" && period === "month") {
+    // Daily data for the last month
+    for (let i = 1; i <= 30; i++) {
+      data.push({
+        date: `2023-05-${i.toString().padStart(2, "0")}`,
+        sales: Math.floor(Math.random() * 5000) + 3000,
+      });
     }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+  } else if (interval === "month" && period === "year") {
+    // Monthly data for the last year
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    for (let i = 0; i < 12; i++) {
+      data.push({
+        date: months[i],
+        sales: Math.floor(Math.random() * 50000) + 30000,
+      });
+    }
+  }
+
+  return { data };
+};
 
 export const dashboardService = {
-  // Get owner dashboard data with period filter
-  getOwnerDashboard: async (period = "month") => {
-    try {
-      let url = `/dashboard/owner`;
-
-      // Handle custom date range or standard period
-      if (period.startsWith("custom")) {
-        url += `?${period.substring(7)}`; // Remove 'custom&' and add the rest as query params
-      } else {
-        url += `?period=${period}`;
-      }
-
-      const response = await api.get(url);
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching owner dashboard data:", error);
-      throw error;
-    }
-  },
-
-  // Get warehouse manager dashboard data
-  getWarehouseDashboard: async () => {
-    try {
-      const response = await api.get("/dashboard/warehouse");
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching warehouse dashboard data:", error);
-      throw error;
-    }
-  },
-
-  // Get salesman dashboard data
-  getSalesmanDashboard: async () => {
-    try {
-      const response = await api.get("/dashboard/salesman");
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching salesman dashboard data:", error);
-      throw error;
-    }
-  },
-
-  // Get shop dashboard data
-  getShopDashboard: async () => {
-    try {
-      const response = await api.get("/dashboard/shop");
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching shop dashboard data:", error);
-      throw error;
-    }
-  },
-
-  // Get sales summary data
-  getSalesSummary: async (startDate, endDate) => {
-    try {
-      const response = await api.get(
-        `/dashboard/sales-summary?startDate=${startDate}&endDate=${endDate}`
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching sales summary:", error);
-      throw error;
-    }
-  },
-
-  // Get product performance data
-  getProductPerformance: async (startDate, endDate, productId = null) => {
-    try {
-      let url = `/dashboard/product-performance?startDate=${startDate}&endDate=${endDate}`;
-      if (productId) url += `&productId=${productId}`;
-
-      const response = await api.get(url);
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching product performance:", error);
-      throw error;
-    }
-  },
-
-  // Get inventory status data
-  getInventoryStatus: async () => {
-    try {
-      const response = await api.get("/dashboard/inventory-status");
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching inventory status:", error);
-      throw error;
-    }
-  },
+  getSalesSummary,
+  getSalesmanPerformance,
+  getTopProducts,
+  getInventorySummary,
+  getSalesOverTime,
 };

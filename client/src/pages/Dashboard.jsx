@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  LineChart,
+  Line,
   BarChart,
   Bar,
   PieChart,
@@ -17,7 +19,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import { dashboardService } from "../../services/dashboardService";
+import { dashboardService } from "../services/dashboardService";
 import { Loader } from "@/components/common/Loader";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 

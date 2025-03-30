@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const { authenticate } = require("../middleware/auth");
-const checkRole = require("../middleware/roleCheck");
+const { checkRole } = require("../middleware/roleCheck");
 const returnController = require("../controllers/returnController");
 const { validateReturn } = require("../middleware/validation");
 
@@ -10,7 +10,7 @@ const { validateReturn } = require("../middleware/validation");
 router.get(
   "/",
   authenticate,
-  checkRole("owner", "warehouse_manager"),
+  checkRole(["owner", "warehouse_manager"]),
   returnController.getAllReturns
 );
 
@@ -21,7 +21,7 @@ router.get("/:id", authenticate, returnController.getReturnById);
 router.post(
   "/shop",
   authenticate,
-  checkRole("salesman"),
+  checkRole(["salesman"]),
   validateReturn,
   returnController.createShopReturn
 );
@@ -30,7 +30,7 @@ router.post(
 router.post(
   "/salesman",
   authenticate,
-  checkRole("warehouse_manager"),
+  checkRole(["warehouse_manager"]),
   validateReturn,
   returnController.createSalesmanReturn
 );
@@ -49,7 +49,7 @@ router.get(
 router.get(
   "/my-returns",
   authenticate,
-  checkRole("shop"),
+  checkRole(["shop"]),
   returnController.getCurrentShopReturns
 );
 
@@ -57,7 +57,7 @@ router.get(
 router.get(
   "/analysis",
   authenticate,
-  checkRole("owner"),
+  checkRole(["owner"]),
   returnController.getReturnsAnalysis
 );
 

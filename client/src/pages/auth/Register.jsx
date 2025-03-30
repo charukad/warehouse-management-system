@@ -68,6 +68,7 @@ const Register = () => {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm({
     resolver: yupResolver(schema),
   });
@@ -85,19 +86,43 @@ const Register = () => {
       setIsLoading(true);
       setError("");
 
-      // Omit confirmPassword before sending to API
-      const { confirmPassword, ...userData } = data;
+      // Create a copy of data and remove confirmPassword
+      const userData = { ...data };
+      delete userData.confirmPassword;
 
       await registerUser(userData);
-      // Redirect will happen automatically due to the useEffect
+      // On success, the useEffect will handle redirection
     } catch (err) {
-      setError(err.customMessage || "Registration failed. Please try again.");
+      // Handle different types of errors
+      if (err.response) {
+        // Server returned an error response
+        const serverError = err.response.data;
 
-      // Handle validation errors
-      if (err.validationErrors) {
-        console.error("Validation errors:", err.validationErrors);
-        // You could set specific field errors here if needed
+        if (serverError.errors && Array.isArray(serverError.errors)) {
+          // Handle validation errors from the server
+          setError(serverError.errors.map((e) => e.msg).join(", "));
+        } else if (serverError.message) {
+          // Handle standard error message
+          setError(serverError.message);
+        } else {
+          // Generic error for other response errors
+          setError(`Server error: ${err.response.status}`);
+        }
+      } else if (err.request) {
+        // Request was made but no response received (network error)
+        setError("Network error. Please check your connection and try again.");
+      } else if (err.customMessage) {
+        // Use custom message if available (from your auth context)
+        setError(err.customMessage);
+      } else {
+        // For any other type of error
+        setError("Registration failed. Please try again.");
       }
+
+      // Log the full error for debugging
+      console.error("Registration error:", err);
+
+      // No need to reset the form on error so the user can fix and resubmit
     } finally {
       setIsLoading(false);
     }

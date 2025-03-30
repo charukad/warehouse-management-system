@@ -1,6 +1,6 @@
-// server/models/Shop.js
 const mongoose = require("mongoose");
 
+// Define the schema with consistent naming (I'll use ShopSchema with capital S)
 const ShopSchema = new mongoose.Schema(
   {
     user: {
@@ -89,23 +89,27 @@ const ShopSchema = new mongoose.Schema(
 );
 
 // Create a geospatial index for location-based queries
-shopSchema.index(
+// FIXED: Use ShopSchema instead of shopSchema
+ShopSchema.index(
   {
-    shop_name: "text",
+    // FIXED: Changed field names to match your schema definition
+    shopName: "text",
     address: "text",
-    contact_person: "text",
-    phone_number: "text",
+    contactPerson: "text",
+    phoneNumber: "text",
   },
   {
     weights: {
-      shop_name: 10,
-      contact_person: 5,
-      phone_number: 5,
+      // FIXED: Changed field names to match your schema definition
+      shopName: 10,
+      contactPerson: 5,
+      phoneNumber: 5,
       address: 1,
     },
   }
 );
 
-const Shop = mongoose.model("Shop", shopSchema);
-
-module.exports = mongoose.model("Shop", ShopSchema);
+// FIXED: Avoiding duplicate model creation and export
+// Create the model only once and export it
+const Shop = mongoose.model("Shop", ShopSchema);
+module.exports = Shop;

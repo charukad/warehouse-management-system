@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const { authenticate } = require("../middleware/auth");
-const checkRole = require("../middleware/roleCheck");
+const { checkRole } = require("../middleware/roleCheck");
 const shopController = require("../controllers/shopController");
 const {
   validateShop,
@@ -13,7 +13,7 @@ const {
 router.get(
   "/",
   authenticate,
-  checkRole("owner", "warehouse_manager"),
+  checkRole(["owner", "warehouse_manager"]),
   shopController.getAllShops
 );
 
@@ -24,7 +24,7 @@ router.get("/:id", authenticate, shopController.getShopById);
 router.post(
   "/",
   authenticate,
-  checkRole("salesman"),
+  checkRole(["salesman"]),
   validateShop,
   shopController.createShop
 );
@@ -36,7 +36,7 @@ router.put("/:id", authenticate, validateShopUpdate, shopController.updateShop);
 router.put(
   "/:id/deactivate",
   authenticate,
-  checkRole("owner"),
+  checkRole(["owner"]),
   shopController.deactivateShop
 );
 
@@ -44,7 +44,7 @@ router.put(
 router.put(
   "/:id/reactivate",
   authenticate,
-  checkRole("owner"),
+  checkRole(["owner"]),
   shopController.reactivateShop
 );
 
@@ -52,7 +52,7 @@ router.put(
 router.get(
   "/territory/:territoryId",
   authenticate,
-  checkRole("owner", "warehouse_manager"),
+  checkRole(["owner", "warehouse_manager"]),
   shopController.getShopsByTerritory
 );
 
@@ -67,7 +67,7 @@ router.get(
 router.get(
   "/nearby",
   authenticate,
-  checkRole("salesman"),
+  checkRole(["salesman"]),
   shopController.getNearbyShops
 );
 
@@ -75,7 +75,7 @@ router.get(
 router.get(
   "/restocking-due",
   authenticate,
-  checkRole("salesman", "warehouse_manager"),
+  checkRole(["salesman", "warehouse_manager"]),
   shopController.getShopsDueForRestocking
 );
 

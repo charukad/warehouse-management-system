@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const { authenticate } = require("../middleware/auth");
-const checkRole = require("../middleware/roleCheck");
+const { checkRole } = require("../middleware/roleCheck");
 const orderController = require("../controllers/orderController");
 const { validateOrder } = require("../middleware/validation");
 
@@ -10,7 +10,7 @@ const { validateOrder } = require("../middleware/validation");
 router.get(
   "/",
   authenticate,
-  checkRole("owner", "warehouse_manager"),
+  checkRole(["owner", "warehouse_manager"]),
   orderController.getAllOrders
 );
 
@@ -21,7 +21,7 @@ router.get("/:id", authenticate, orderController.getOrderById);
 router.post(
   "/",
   authenticate,
-  checkRole("salesman", "shop"),
+  checkRole(["salesman", "shop"]),
   validateOrder,
   orderController.createOrder
 );
@@ -30,7 +30,7 @@ router.post(
 router.put(
   "/:id/status",
   authenticate,
-  checkRole("salesman"),
+  checkRole(["salesman"]),
   orderController.updateOrderStatus
 );
 
@@ -48,7 +48,7 @@ router.get(
 router.get(
   "/my-orders",
   authenticate,
-  checkRole("shop"),
+  checkRole(["shop"]),
   orderController.getCurrentShopOrders
 );
 
@@ -56,7 +56,7 @@ router.get(
 router.get(
   "/my-processed-orders",
   authenticate,
-  checkRole("salesman"),
+  checkRole(["salesman"]),
   orderController.getCurrentSalesmanOrders
 );
 

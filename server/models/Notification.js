@@ -55,9 +55,9 @@ const notificationSchema = new mongoose.Schema({
 });
 
 // Index for faster queries on recipient and read status
-notificationSchema.index({ recipient_user_id: 1, is_read: 1 });
+//notificationSchema.index({ recipient_user_id: 1, is_read: 1 });
 // Index for time-based expiration (TTL index)
-notificationSchema.index({ expires_at: 1 }, { expireAfterSeconds: 0 });
+//notificationSchema.index({ expires_at: 1 }, { expireAfterSeconds: 0 });
 
 const Notification = mongoose.model("Notification", notificationSchema);
 

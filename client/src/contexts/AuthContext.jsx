@@ -1,167 +1,290 @@
 // client/src/contexts/AuthContext.jsx
+import React, { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-import React, { createContext, useState, useEffect } from "react";
-import api from "../services/api";
+// Create API instance with your server's base URL
+const api = axios.create({
+  baseURL: "http://localhost:5008/api", // Update this to match your server URL
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-export const AuthContext = createContext();
+// Configure request interceptor to automatically attach authentication token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
+// Create the authentication context
+const AuthContext = createContext();
+
+// Auth provider component that wraps your application
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load user from token on initial render
+  // Check for existing authentication when the component mounts
   useEffect(() => {
-    const loadUser = async () => {
+    const checkAuth = async () => {
       try {
         const token = localStorage.getItem("token");
 
-        if (!token) {
-          setLoading(false);
-          return;
+        if (token) {
+          try {
+            // Validate token with your API
+            const response = await api.get("/auth/validate");
+            setUser(response.data.user || response.data.data);
+          } catch (validationError) {
+            // Token is invalid or expired
+            console.error("Token validation failed:", validationError);
+            localStorage.removeItem("token");
+          }
         }
-
-        // Set token in axios defaults
-        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-        // Fetch user data
-        const response = await api.get("/api/auth/me");
-        setUser(response.data.data);
-        setError(null);
-      } catch (error) {
-        console.error("Error loading user:", error);
+      } catch (err) {
+        console.error("Auth check error:", err);
+        setError("Authentication failed. Please login again.");
         localStorage.removeItem("token");
-        delete api.defaults.headers.common["Authorization"];
-        setError("Failed to authenticate. Please log in again.");
       } finally {
         setLoading(false);
       }
     };
 
-    loadUser();
+    checkAuth();
   }, []);
 
+  // Login function to authenticate users
   const login = async (credentials) => {
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      const response = await api.post("/api/auth/login", credentials);
-      const { token, user } = response.data.data;
+      console.log("Attempting login with credentials:", {
+        username: credentials.username,
+        password: "********", // Hide password in logs for security
+      });
 
-      localStorage.setItem("token", token);
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      // Call your login API endpoint
+      const response = await api.post("/auth/login", credentials);
+      console.log("Login successful:", response.data);
 
-      setUser(user);
-      setError(null);
-      return user;
-    } catch (error) {
-      console.error("Login error:", error);
-      setError(
-        error.response?.data?.message ||
-          "Failed to log in. Please check your credentials."
-      );
-      throw error;
+      // Save the authentication token
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      } else if (response.data.data && response.data.data.token) {
+        localStorage.setItem("token", response.data.data.token);
+      }
+
+      // Update user state with returned user data
+      // Handle different response structures
+      const userData =
+        response.data.user ||
+        (response.data.data ? response.data.data.user : null) ||
+        response.data.data;
+
+      if (userData) {
+        setUser(userData);
+        console.log("User data set:", userData);
+      } else {
+        console.warn("No user data found in response:", response.data);
+      }
+
+      return response.data;
+    } catch (err) {
+      console.error("Login error details:", err);
+      console.error("Login error response:", err.response?.data);
+
+      // Format error message from server response or use generic message
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Login failed. Please check your credentials and try again.";
+
+      setError(errorMessage);
+      throw { ...err, customMessage: errorMessage };
     } finally {
       setLoading(false);
     }
   };
 
-  const register = async (userData) => {
+  // Registration function - named to match what the Register component expects
+  const registerUser = async (userData) => {
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      const response = await api.post("/api/auth/register", userData);
-      const { token, user } = response.data.data;
+      console.log("Sending registration data to server:", {
+        ...userData,
+        password: "********", // Hide password in logs for security
+      });
 
-      localStorage.setItem("token", token);
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      // Call your registration API endpoint
+      const response = await api.post("/auth/register", userData);
+      console.log("Registration successful:", response.data);
 
-      setUser(user);
-      setError(null);
-      return user;
-    } catch (error) {
-      console.error("Registration error:", error);
-      setError(
-        error.response?.data?.message || "Failed to register. Please try again."
+      // Option 1: Automatically log the user in after registration
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        setUser(response.data.user || response.data.data);
+      } else if (response.data.data && response.data.data.token) {
+        localStorage.setItem("token", response.data.data.token);
+        setUser(response.data.data.user || response.data.data);
+      }
+
+      return response.data;
+    } catch (err) {
+      console.error(
+        "Registration error details:",
+        err.response?.data || err.message || err
       );
-      throw error;
+
+      // Format error message from server response or use generic message
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Registration failed. Please try again.";
+
+      // Extract validation errors if available
+      const validationErrors = err.response?.data?.errors;
+
+      setError(errorMessage);
+      throw {
+        ...err,
+        customMessage: errorMessage,
+        validationErrors,
+      };
     } finally {
       setLoading(false);
     }
   };
 
+  // Logout function to clear authentication state
   const logout = () => {
     localStorage.removeItem("token");
-    delete api.defaults.headers.common["Authorization"];
     setUser(null);
   };
 
-  const updateProfile = async (userData) => {
+  // Request password reset function
+  const requestPasswordReset = async (email) => {
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      const response = await api.put("/api/auth/profile", userData);
-      setUser(response.data.data);
-      setError(null);
-      return response.data.data;
-    } catch (error) {
-      console.error("Update profile error:", error);
-      setError(
-        error.response?.data?.message ||
-          "Failed to update profile. Please try again."
+      console.log("Requesting password reset for email:", email);
+
+      // Call your password reset request API endpoint
+      const response = await api.post("/auth/forgot-password", { email });
+      console.log("Password reset request successful:", response.data);
+
+      return response.data;
+    } catch (err) {
+      console.error(
+        "Password reset request error:",
+        err.response?.data || err.message || err
       );
-      throw error;
+
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to send password reset. Please try again.";
+
+      setError(errorMessage);
+      throw { ...err, customMessage: errorMessage };
     } finally {
       setLoading(false);
     }
   };
 
-  const forgotPassword = async (email) => {
+  // Reset password function using token
+  const resetPassword = async (token, newPassword) => {
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      await api.post("/api/auth/forgot-password", { email });
-      setError(null);
-    } catch (error) {
-      console.error("Forgot password error:", error);
-      setError(
-        error.response?.data?.message ||
-          "Failed to process password reset request. Please try again."
+      console.log("Resetting password using token");
+
+      // Call your password reset API endpoint
+      const response = await api.post("/auth/reset-password", {
+        token,
+        password: newPassword,
+      });
+
+      console.log("Password reset successful:", response.data);
+      return response.data;
+    } catch (err) {
+      console.error(
+        "Password reset error:",
+        err.response?.data || err.message || err
       );
-      throw error;
+
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to reset password. Please try again.";
+
+      setError(errorMessage);
+      throw { ...err, customMessage: errorMessage };
     } finally {
       setLoading(false);
     }
   };
 
-  const resetPassword = async (token, password) => {
-    try {
-      setLoading(true);
-      await api.post("/api/auth/reset-password", { token, password });
-      setError(null);
-    } catch (error) {
-      console.error("Reset password error:", error);
-      setError(
-        error.response?.data?.message ||
-          "Failed to reset password. Please try again."
-      );
-      throw error;
-    } finally {
-      setLoading(false);
+  // Get user's role from user data
+  const getUserRole = () => {
+    if (!user) return null;
+    return user.role || null;
+  };
+
+  // Determine dashboard URL based on user role
+  const getDashboardUrl = () => {
+    const role = getUserRole();
+    switch (role) {
+      case "owner":
+        return "/owner/Dashboard";
+      case "warehouse_manager":
+        return "/warehouse/dashboard";
+      case "salesman":
+        return "/salesman/dashboard";
+      case "shop":
+        return "/shop/dashboard";
+      default:
+        return "/dashboard";
     }
   };
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        error,
-        login,
-        register,
-        logout,
-        updateProfile,
-        forgotPassword,
-        resetPassword,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  // Prepare the context value with all authentication functions and state
+  const value = {
+    user,
+    loading,
+    error,
+    login,
+    registerUser, // Using the name expected by the Register component
+    register: registerUser, // Providing an alias for backward compatibility
+    logout,
+    requestPasswordReset,
+    resetPassword,
+    isAuthenticated: !!user, // Boolean indicating authentication status
+    getUserRole,
+    getDashboardUrl,
+  };
+
+  // Provide the authentication context to child components
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+// Custom hook to easily use the auth context in components
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 };

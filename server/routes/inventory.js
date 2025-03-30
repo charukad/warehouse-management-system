@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const { authenticate } = require("../middleware/auth");
-const checkRole = require("../middleware/roleCheck");
+const { checkRole } = require("../middleware/roleCheck");
 const inventoryController = require("../controllers/inventoryController");
 const { validateInventoryUpdate } = require("../middleware/validation");
 
@@ -10,7 +10,7 @@ const { validateInventoryUpdate } = require("../middleware/validation");
 router.get(
   "/",
   authenticate,
-  checkRole("owner", "warehouse_manager"),
+  checkRole(["owner", "warehouse_manager"]),
   inventoryController.getAllInventory
 );
 
@@ -25,7 +25,7 @@ router.get(
 router.put(
   "/product/:productId",
   authenticate,
-  checkRole("warehouse_manager"),
+  checkRole(["warehouse_manager"]),
   validateInventoryUpdate,
   inventoryController.updateInventory
 );
@@ -34,7 +34,7 @@ router.put(
 router.get(
   "/low-stock",
   authenticate,
-  checkRole("owner", "warehouse_manager"),
+  checkRole(["owner", "warehouse_manager"]),
   inventoryController.getLowStockItems
 );
 
@@ -42,7 +42,7 @@ router.get(
 router.get(
   "/history/product/:productId",
   authenticate,
-  checkRole("owner", "warehouse_manager"),
+  checkRole(["owner", "warehouse_manager"]),
   inventoryController.getInventoryHistory
 );
 
@@ -50,7 +50,7 @@ router.get(
 router.get(
   "/transactions",
   authenticate,
-  checkRole("owner", "warehouse_manager"),
+  checkRole(["owner", "warehouse_manager"]),
   inventoryController.getAllTransactions
 );
 
@@ -58,7 +58,7 @@ router.get(
 router.post(
   "/transactions",
   authenticate,
-  checkRole("warehouse_manager"),
+  checkRole(["warehouse_manager"]),
   inventoryController.recordTransaction
 );
 
@@ -66,7 +66,7 @@ router.post(
 router.get(
   "/snapshot",
   authenticate,
-  checkRole("owner", "warehouse_manager"),
+  checkRole(["owner", "warehouse_manager"]),
   inventoryController.getInventorySnapshot
 );
 

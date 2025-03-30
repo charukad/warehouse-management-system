@@ -1,80 +1,100 @@
-// client/public/sw.js
-const CACHE_NAME = "sathira-sweet-v1";
-const OFFLINE_URL = "/offline.html";
+// client/public/sw.js (or wherever your service worker is located)
 
-// Assets to cache when the service worker is installed
+// Cache name - update this if you need to invalidate the cache
+const CACHE_NAME = "sathira-sweet-cache-v1";
+
+// Application assets to cache on install
 const urlsToCache = [
   "/",
-  "/offline.html",
-  "/src/assets/images/logo.png",
-  "/manifest.json",
-  // Add other critical assets
+  "/index.html",
+  "/static/js/main.chunk.js",
+  // Add other assets you want to cache
 ];
 
-// Install event - cache critical assets
+// Install event - cache static assets
 self.addEventListener("install", (event) => {
+  console.log("Service Worker: Installing...");
+
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log("Opened cache");
-      return cache.addAll(urlsToCache);
-    })
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => {
+        console.log("Service Worker: Caching files...");
+        return cache.addAll(urlsToCache);
+      })
+      .then(() => self.skipWaiting())
   );
 });
 
 // Activate event - clean up old caches
 self.addEventListener("activate", (event) => {
+  console.log("Service Worker: Activated");
+
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames
-          .filter((cacheName) => {
-            return cacheName !== CACHE_NAME;
-          })
-          .map((cacheName) => {
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log("Service Worker: Clearing old cache", cacheName);
             return caches.delete(cacheName);
-          })
+          }
+          return null;
+        })
       );
     })
   );
 });
 
-// Fetch event - serve cached content when offline
+// Fetch event - respond with cached resources or fetch from network
 self.addEventListener("fetch", (event) => {
-  // Only cache API requests or specific file types
-  if (
-    event.request.url.includes("/api/") ||
-    event.request.url.match(/\.(js|css|html|png|jpg|jpeg|svg|json)$/)
-  ) {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          // If the response is valid, clone it and store it in the cache
-          if (response && response.status === 200) {
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // If network request fails, try to serve from cache
-          return caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-
-            // If it's a navigation request, serve the offline page
-            if (event.request.mode === "navigate") {
-              return caches.match(OFFLINE_URL);
-            }
-
-            return new Response("Network error occurred", {
-              status: 408,
-              headers: { "Content-Type": "text/plain" },
-            });
-          });
-        })
-    );
+  // IMPORTANT FIX: Skip caching for POST, PUT, DELETE requests
+  if (event.request.method !== "GET") {
+    // For non-GET requests, just fetch from network without caching
+    return event.respondWith(fetch(event.request));
   }
+
+  // For GET requests, try cache first with network fallback
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      // Return cached response if found
+      if (response) {
+        return response;
+      }
+
+      // Clone the request because it's a one-time use stream
+      const fetchRequest = event.request.clone();
+
+      // Make network request
+      return fetch(fetchRequest).then((response) => {
+        // Check if received a valid response
+        if (!response || response.status !== 200 || response.type !== "basic") {
+          return response;
+        }
+
+        // Clone the response because it's a one-time use stream
+        const responseToCache = response.clone();
+
+        // Open the cache and store the new response
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
+        });
+
+        return response;
+      });
+    })
+  );
+});
+
+// Handle background sync for offline functionality if needed
+self.addEventListener("sync", (event) => {
+  console.log("Service Worker: Sync event triggered", event.tag);
+
+  // Implement background sync logic here if needed
+});
+
+// Handle push notifications if needed
+self.addEventListener("push", (event) => {
+  console.log("Service Worker: Push event received", event);
+
+  // Implement push notification logic here if needed
 });

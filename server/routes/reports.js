@@ -2,79 +2,39 @@
 const express = require("express");
 const router = express.Router();
 const { authenticate } = require("../middleware/auth");
-const checkRole = require("../middleware/roleCheck");
+const { checkRole } = require("../middleware/roleCheck");
 const reportController = require("../controllers/reportController");
 
-// Get sales summary report - accessible to owner only
-router.get(
-  "/sales-summary",
-  authenticate,
-  checkRole("owner"),
-  reportController.getSalesSummary
-);
-
-// Get product performance report - accessible to owner only
-router.get(
-  "/product-performance",
-  authenticate,
-  checkRole("owner"),
-  reportController.getProductPerformance
-);
-
-// Get salesman performance report - accessible to owner only
-router.get(
-  "/salesman-performance",
-  authenticate,
-  checkRole("owner"),
-  reportController.getSalesmanPerformance
-);
-
-// Get shop performance report - accessible to owner only
-router.get(
-  "/shop-performance",
-  authenticate,
-  checkRole("owner"),
-  reportController.getShopPerformance
-);
-
-// Get inventory status report - accessible to owner and warehouse manager
-router.get(
-  "/inventory-status",
-  authenticate,
-  checkRole("owner", "warehouse_manager"),
-  reportController.getInventoryStatus
-);
-
-// Get returns analysis report - accessible to owner only
-router.get(
-  "/returns-analysis",
-  authenticate,
-  checkRole("owner"),
-  reportController.getReturnsAnalysis
-);
-
-// Get financial report - accessible to owner only
-router.get(
+// Generate financial report - accessible to owner only
+router.post(
   "/financial",
   authenticate,
-  checkRole("owner"),
-  reportController.getFinancialReport
+  checkRole(["owner"]),
+  reportController.generateFinancialReport
 );
 
-// Get custom report - accessible to owner only
+// Generate inventory report - accessible to owner and warehouse manager
 router.post(
-  "/custom",
+  "/inventory",
   authenticate,
-  checkRole("owner"),
-  reportController.generateCustomReport
+  checkRole(["owner", "warehouse_manager"]),
+  reportController.generateInventoryReport
 );
 
-// Export report to PDF - accessible to owner only
-router.get(
-  "/export/:reportType",
+// Generate salesman report - accessible to owner only
+router.post(
+  "/salesman",
   authenticate,
-  checkRole("owner"),
-  reportController.exportReport
+  checkRole(["owner"]),
+  reportController.generateSalesmanReport
+);
+
+// Generate product report - accessible to owner only
+router.post(
+  "/product",
+  authenticate,
+  checkRole(["owner"]),
+  reportController.generateProductReport
 );
 
 module.exports = router;

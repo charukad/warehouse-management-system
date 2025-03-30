@@ -37,7 +37,7 @@ export const UIProvider = ({ children }) => {
     if (notification.timeout !== false) {
       setTimeout(() => {
         removeNotification(id);
-      }, notification.timeout || 5000);
+      }, notification.timeout || 5008);
     }
   };
 

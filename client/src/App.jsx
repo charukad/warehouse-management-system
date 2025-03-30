@@ -43,6 +43,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
             </Route>
+
             {/* Main App Routes */}
             <Route
               element={
@@ -158,35 +159,7 @@ function App() {
                 }
               />
             </Route>
-            // Update your routes in app.js or router file // Before (with
-            individual routes)
-            <Route path="/owner/dashboard" element={<OwnerDashboard />} />
-            <Route
-              path="/warehouse/dashboard"
-              element={<WarehouseDashboard />}
-            />
-            <Route path="/salesman/dashboard" element={<SalesmanDashboard />} />
-            <Route path="/shop/dashboard" element={<ShopDashboard />} />
-            // After (with central dashboard routing)
-            <Route path="/dashboard" element={<Dashboard />} />
-            // Update your routes configuration // Add these new routes to your
-            existing routes
-            <Route
-              path="/owner/advanced-analytics"
-              element={
-                <ProtectedRoute allowedRoles={["owner"]}>
-                  <AdvancedAnalytics />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/owner/shops-map"
-              element={
-                <ProtectedRoute allowedRoles={["owner"]}>
-                  <ShopsMap />
-                </ProtectedRoute>
-              }
-            />
+
             {/* 404 Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
