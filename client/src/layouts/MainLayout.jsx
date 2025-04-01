@@ -1,11 +1,11 @@
 // MainLayout.jsx with updated navigation paths
 
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, Outlet } from "react-router-dom"; // Added Outlet import
 import { User, TrendingUp, Map } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
-const MainLayout = ({ children }) => {
+const MainLayout = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -162,7 +162,8 @@ const MainLayout = ({ children }) => {
 
       {/* Main content */}
       <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-20 md:pt-8">
-        {children}
+        <Outlet />{" "}
+        {/* This is the key change - Replace {children} with <Outlet /> */}
       </main>
     </div>
   );
