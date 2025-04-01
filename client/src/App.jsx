@@ -22,6 +22,7 @@ import ProductManagement from "./pages/owner/ProductManagement";
 import InventoryManagement from "./pages/warehouse/Inventory";
 import Distribution from "./pages/warehouse/Distribution";
 import Returns from "./pages/warehouse/Returns";
+import SalesmanDashboard from "./pages/salesman/Dashboard";
 import ShopManagement from "./pages/salesman/Shops";
 import Deliveries from "./pages/salesman/Deliveries";
 import SalesmanInventory from "./pages/salesman/Inventory";
@@ -129,6 +130,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["salesman"]}>
                     <SalesmanInventory />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/salesman"
+                element={
+                  <ProtectedRoute allowedRoles={["salesman"]}>
+                    <SalesmanDashboard />
                   </ProtectedRoute>
                 }
               />

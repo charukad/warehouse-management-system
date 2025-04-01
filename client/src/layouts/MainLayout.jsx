@@ -18,7 +18,7 @@ const MainLayout = ({ children }) => {
     switch (user?.role) {
       case "owner":
         roleSpecificItems = [
-          { path: "/dashboard", label: "Dashboard" },
+          { path: "/owner/dashboard", label: "Dashboard" },
           { path: "/owner/users", label: "User Management" },
           { path: "/owner/products", label: "Products" },
           { path: "/owner/reports", label: "Reports" },
@@ -44,7 +44,7 @@ const MainLayout = ({ children }) => {
         break;
       case "salesman":
         roleSpecificItems = [
-          { path: "/dashboard", label: "Dashboard" },
+          { path: "/salesman/dashboard", label: "Dashboard" },
           { path: "/salesman/shops", label: "Shops" },
           { path: "/salesman/deliveries", label: "Deliveries" },
           { path: "/salesman/returns", label: "Returns" },
@@ -76,7 +76,9 @@ const MainLayout = ({ children }) => {
       {/* Sidebar */}
       <aside className="hidden md:flex flex-col w-64 bg-white shadow-md">
         <div className="p-4 border-b">
-          <h2 className="text-xl font-bold text-indigo-600">Sathira Sweet</h2>
+          <h2 className="text-xl font-bold text-indigo-600">
+            Sathira Sweet puka2
+          </h2>
         </div>
         <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-2">

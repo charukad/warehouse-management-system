@@ -52,7 +52,7 @@ const Navbar = () => {
             <div className="flex-shrink-0 flex items-center">
               <Link to="/">
                 <h1 className="text-xl font-bold text-gray-900">
-                  Sathira Sweet
+                  Sathira Sweet puka
                 </h1>
               </Link>
             </div>

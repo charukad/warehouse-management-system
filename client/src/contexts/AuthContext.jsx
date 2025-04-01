@@ -245,18 +245,28 @@ export const AuthProvider = ({ children }) => {
 
   // Determine dashboard URL based on user role
   const getDashboardUrl = () => {
-    const role = getUserRole();
+    //if (!user) return "/dashboard";
+
+    // Extract role from user data, accounting for different response structures
+    const role =
+      user.role ||
+      (user.data && user.data.role) ||
+      (user.user && user.user.role);
+
+    console.log("Determining dashboard URL for role:", role);
+
+    // Map roles to their appropriate starting pages based on your route structure
     switch (role) {
       case "owner":
-        return "/owner/Dashboard";
+        return "/reports"; // Redirect owners to the reports page
       case "warehouse_manager":
-        return "/warehouse/dashboard";
+        return "/inventory"; // Redirect warehouse managers to inventory page
       case "salesman":
-        return "/salesman/dashboard";
+        return "/shops"; // Redirect salesmen to shops management page
       case "shop":
-        return "/shop/dashboard";
-      default:
-        return "/dashboard";
+        return "/orders"; // Redirect shops to their orders page
+      //default:
+      //return "/dashboard"; // Fallback to the generic dashboard
     }
   };
 
