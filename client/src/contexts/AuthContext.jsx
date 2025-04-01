@@ -40,8 +40,8 @@ export const AuthProvider = ({ children }) => {
 
         if (token) {
           try {
-            // Validate token with your API
-            const response = await api.get("/auth/validate");
+            // Validate token with your API - using the correct endpoint
+            const response = await api.get("/auth/me");
             setUser(response.data.user || response.data.data);
           } catch (validationError) {
             // Token is invalid or expired
@@ -92,6 +92,8 @@ export const AuthProvider = ({ children }) => {
 
       if (userData) {
         setUser(userData);
+        // Also store user data in local storage as a fallback
+        localStorage.setItem("user", JSON.stringify(userData));
         console.log("User data set:", userData);
       } else {
         console.warn("No user data found in response:", response.data);
@@ -134,9 +136,17 @@ export const AuthProvider = ({ children }) => {
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
         setUser(response.data.user || response.data.data);
+        localStorage.setItem(
+          "user",
+          JSON.stringify(response.data.user || response.data.data)
+        );
       } else if (response.data.data && response.data.data.token) {
         localStorage.setItem("token", response.data.data.token);
         setUser(response.data.data.user || response.data.data);
+        localStorage.setItem(
+          "user",
+          JSON.stringify(response.data.data.user || response.data.data)
+        );
       }
 
       return response.data;
@@ -169,6 +179,7 @@ export const AuthProvider = ({ children }) => {
   // Logout function to clear authentication state
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
   };
 
@@ -265,8 +276,8 @@ export const AuthProvider = ({ children }) => {
         return "/shops"; // Redirect salesmen to shops management page
       case "shop":
         return "/orders"; // Redirect shops to their orders page
-      //default:
-      //return "/dashboard"; // Fallback to the generic dashboard
+      default:
+        return "/dashboard"; // Fallback to the generic dashboard
     }
   };
 

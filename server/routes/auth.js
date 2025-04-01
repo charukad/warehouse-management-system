@@ -17,6 +17,7 @@ router.post("/logout", authController.logout);
 
 // Protected routes (require authentication)
 router.get("/me", authenticate, authController.getCurrentUser);
+router.get("/current-user", authenticate, authController.getCurrentUser); // Added for backward compatibility
 router.put(
   "/update-password",
   authenticate,
