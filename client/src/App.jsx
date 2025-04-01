@@ -29,7 +29,7 @@ import SalesmanInventory from "./pages/salesman/Inventory";
 import ShopOrders from "./pages/shop/Orders";
 import ShopReturns from "./pages/shop/Returns";
 import ShopProfile from "./pages/shop/Profile";
-import NotFound from "./pages/NotFound";
+
 import ProtectedRoute from "./components/common/ProtectedRoute";
 
 function App() {
@@ -170,7 +170,7 @@ function App() {
             </Route>
 
             {/* 404 Route */}
-            <Route path="*" element={<NotFound />} />
+
           </Routes>
         </UIProvider>
       </AuthProvider>

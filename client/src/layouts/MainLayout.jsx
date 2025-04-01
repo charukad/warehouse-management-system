@@ -77,7 +77,8 @@ const MainLayout = ({ children }) => {
       <aside className="hidden md:flex flex-col w-64 bg-white shadow-md">
         <div className="p-4 border-b">
           <h2 className="text-xl font-bold text-indigo-600">
-            Sathira Sweet puka2
+            Sathira Sweet puka2 and ata
+            
           </h2>
         </div>
         <nav className="flex-1 overflow-y-auto p-4">
