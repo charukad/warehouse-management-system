@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Alert } from "../../components/ui/alert";
 import ProductFilters from "../../components/common/ProductFilters";
 import { productService } from "../../services/productService";
+import { supplierService } from "../../services/supplierService";
 
 const ProductManagement = () => {
   const dispatch = useDispatch();
@@ -16,6 +17,7 @@ const ProductManagement = () => {
   const [editProduct, setEditProduct] = useState(null);
   const [productType, setProductType] = useState("all");
   const [formErrors, setFormErrors] = useState({});
+  const [suppliers, setSuppliers] = useState([]);
 
   // Form state for new product
   const [productForm, setProductForm] = useState({
@@ -61,6 +63,35 @@ const ProductManagement = () => {
     };
 
     fetchProductsList();
+
+    // Fetch suppliers for dropdown
+    const fetchSuppliers = async () => {
+      try {
+        const response = await supplierService.getAllSuppliers({
+          isActive: true,
+        });
+        if (response && (response.data?.suppliers || response.data)) {
+          setSuppliers(response.data?.suppliers || response.data);
+        } else {
+          // Use dummy suppliers as fallback
+          setSuppliers([
+            { _id: "supplier1", name: "Supplier A" },
+            { _id: "supplier2", name: "Supplier B" },
+            { _id: "supplier3", name: "Supplier C" },
+          ]);
+        }
+      } catch (err) {
+        console.error("Error fetching suppliers:", err);
+        // Use dummy suppliers as fallback
+        setSuppliers([
+          { _id: "supplier1", name: "Supplier A" },
+          { _id: "supplier2", name: "Supplier B" },
+          { _id: "supplier3", name: "Supplier C" },
+        ]);
+      }
+    };
+
+    fetchSuppliers();
   }, [dispatch]);
 
   // For now, we'll use dummy data until the API is connected
@@ -271,12 +302,7 @@ const ProductManagement = () => {
     setFormErrors({});
   };
 
-  // Placeholder suppliers for dropdown - in a real app, fetch from API
-  const suppliers = [
-    { _id: "supplier1", name: "Supplier A" },
-    { _id: "supplier2", name: "Supplier B" },
-    { _id: "supplier3", name: "Supplier C" },
-  ];
+  // Now we use the suppliers state, populated from the API
 
   return (
     <div className="container mx-auto p-4">

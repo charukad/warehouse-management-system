@@ -170,7 +170,7 @@ const validateInventoryUpdate = [
     .trim(),
 ];
 
-// Distribution validation rules - ADDED THIS MISSING MIDDLEWARE
+// Distribution validation rules
 const validateDistribution = [
   body("items")
     .isArray()
@@ -362,6 +362,40 @@ const validateReturn = [
   body("notes").optional().isString().withMessage("Notes must be a string"),
 ];
 
+// Supplier validation rules
+const validateSupplier = [
+  body("name").notEmpty().withMessage("Supplier name is required").trim(),
+
+  body("phoneNumber")
+    .notEmpty()
+    .withMessage("Phone number is required")
+    .matches(/^[0-9+\-\s]+$/)
+    .withMessage("Please provide a valid phone number"),
+
+  body("email")
+    .optional()
+    .isEmail()
+    .withMessage("Please provide a valid email address"),
+
+  body("address")
+    .optional()
+    .isString()
+    .withMessage("Address must be a string")
+    .trim(),
+
+  body("website")
+    .optional()
+    .isURL()
+    .withMessage("Please provide a valid website URL")
+    .trim(),
+
+  body("paymentTerms")
+    .optional()
+    .isString()
+    .withMessage("Payment terms must be a string")
+    .trim(),
+];
+
 module.exports = {
   registerValidation,
   loginValidation,
@@ -374,5 +408,5 @@ module.exports = {
   validateShopUpdate,
   validateOrder,
   validateReturn,
-  // Added this export
+  validateSupplier,
 };

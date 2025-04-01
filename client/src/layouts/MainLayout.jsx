@@ -1,8 +1,7 @@
-// MainLayout.jsx with updated navigation paths
-
+// client/src/layouts/MainLayout.jsx
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, Outlet } from "react-router-dom"; // Added Outlet import
-import { User, TrendingUp, Map } from "lucide-react";
+import { User, TrendingUp, Map, Briefcase } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
 const MainLayout = () => {
@@ -23,6 +22,11 @@ const MainLayout = () => {
           { path: "/dashboard", label: "Dashboard" },
           { path: "/users", label: "User Management" },
           { path: "/products", label: "Products" },
+          {
+            path: "/suppliers",
+            label: "Suppliers",
+            icon: <Briefcase size={18} />,
+          },
           { path: "/reports", label: "Reports" },
           {
             path: "/advanced-analytics",
@@ -79,7 +83,7 @@ const MainLayout = () => {
       <aside className="hidden md:flex flex-col w-64 bg-white shadow-md">
         <div className="p-4 border-b">
           <h2 className="text-xl font-bold text-indigo-600">
-            Sathira Sweet puka2 and ata23234554231
+            Sathira Sweet puka2 and ata2323455423111d
           </h2>
         </div>
         <nav className="flex-1 overflow-y-auto p-4">

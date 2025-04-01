@@ -1,5 +1,4 @@
-// Updated App.jsx with additional routes for owner paths
-
+// client/src/App.jsx
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -19,6 +18,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import Reports from "./pages/owner/Reports";
 import UserManagement from "./pages/owner/UserManagement";
 import ProductManagement from "./pages/owner/ProductManagement";
+import SupplierManagement from "./pages/owner/SupplierManagement";
 import InventoryManagement from "./pages/warehouse/Inventory";
 import Distribution from "./pages/warehouse/Distribution";
 import Returns from "./pages/warehouse/Returns";
@@ -81,6 +81,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["owner"]}>
                     <ProductManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/suppliers"
+                element={
+                  <ProtectedRoute allowedRoles={["owner"]}>
+                    <SupplierManagement />
                   </ProtectedRoute>
                 }
               />

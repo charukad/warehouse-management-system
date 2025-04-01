@@ -68,6 +68,7 @@ const safeRequire = (routePath) => {
 app.use("/api/auth", safeRequire("./routes/auth"));
 app.use("/api/users", safeRequire("./routes/users"));
 app.use("/api/products", safeRequire("./routes/products"));
+app.use("/api/suppliers", safeRequire("./routes/suppliers"));
 app.use("/api/inventory", safeRequire("./routes/inventory"));
 app.use("/api/distribution", safeRequire("./routes/distribution"));
 app.use("/api/shops", safeRequire("./routes/shops"));

@@ -1,5 +1,4 @@
 // client/src/components/common/Sidebar.jsx
-
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -17,6 +16,7 @@ import {
   Store,
   ShoppingCart,
   UserCircle,
+  Briefcase,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -53,6 +53,11 @@ const Sidebar = () => {
         title: "Product Management",
         path: "/products",
         icon: <Package className="h-5 w-5" />,
+      },
+      {
+        title: "Suppliers",
+        path: "/suppliers",
+        icon: <Briefcase className="h-5 w-5" />,
       },
       {
         title: "Inventory",
