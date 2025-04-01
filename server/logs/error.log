@@ -1,0 +1,7 @@
+[2025-04-01T16:55:48.081Z] ERROR: POST /api/products
+ValidationError: Product validation failed: productType: Product type is required, wholesalePrice: Wholesale price is required, retailPrice: Retail price is required, productCode: Product code is required, name: Product name is required
+    at Document.invalidate (/Users/dasuncharuka/Desktop/sathira_sweet2/server/node_modules/mongoose/lib/document.js:3329:32)
+    at /Users/dasuncharuka/Desktop/sathira_sweet2/server/node_modules/mongoose/lib/document.js:3090:17
+    at /Users/dasuncharuka/Desktop/sathira_sweet2/server/node_modules/mongoose/lib/schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+
