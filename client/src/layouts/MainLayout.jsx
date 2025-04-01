@@ -1,7 +1,9 @@
+// MainLayout.jsx with updated navigation paths
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { User, TrendingUp, Map } from "lucide-react"; // Make sure these imports are correct
-import { useAuth } from "../hooks/useAuth"; // Adjust the path if needed
+import { User, TrendingUp, Map } from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
 
 const MainLayout = ({ children }) => {
   const location = useLocation();
@@ -18,17 +20,17 @@ const MainLayout = ({ children }) => {
     switch (user?.role) {
       case "owner":
         roleSpecificItems = [
-          { path: "/owner/dashboard", label: "Dashboard" },
-          { path: "/owner/users", label: "User Management" },
-          { path: "/owner/products", label: "Products" },
-          { path: "/owner/reports", label: "Reports" },
+          { path: "/dashboard", label: "Dashboard" },
+          { path: "/users", label: "User Management" },
+          { path: "/products", label: "Products" },
+          { path: "/reports", label: "Reports" },
           {
-            path: "/owner/advanced-analytics",
+            path: "/advanced-analytics",
             label: "Advanced Analytics",
             icon: <TrendingUp size={18} />,
           },
           {
-            path: "/owner/shops-map",
+            path: "/shops-map",
             label: "Shops Map",
             icon: <Map size={18} />,
           },
@@ -37,25 +39,25 @@ const MainLayout = ({ children }) => {
       case "warehouse_manager":
         roleSpecificItems = [
           { path: "/dashboard", label: "Dashboard" },
-          { path: "/warehouse/inventory", label: "Inventory" },
-          { path: "/warehouse/distribution", label: "Distribution" },
-          { path: "/warehouse/returns", label: "Returns" },
+          { path: "/inventory", label: "Inventory" },
+          { path: "/distribution", label: "Distribution" },
+          { path: "/returns/warehouse", label: "Returns" },
         ];
         break;
       case "salesman":
         roleSpecificItems = [
-          { path: "/salesman/dashboard", label: "Dashboard" },
-          { path: "/salesman/shops", label: "Shops" },
-          { path: "/salesman/deliveries", label: "Deliveries" },
-          { path: "/salesman/returns", label: "Returns" },
-          { path: "/salesman/map", label: "Map" },
+          { path: "/dashboard/salesman", label: "Dashboard" },
+          { path: "/shops", label: "Shops" },
+          { path: "/deliveries", label: "Deliveries" },
+          { path: "/returns", label: "Returns" },
+          { path: "/map", label: "Map" },
         ];
         break;
       case "shop":
         roleSpecificItems = [
           { path: "/dashboard", label: "Dashboard" },
-          { path: "/shop/orders", label: "Orders" },
-          { path: "/shop/returns", label: "Returns" },
+          { path: "/orders", label: "Orders" },
+          { path: "/returns/shop", label: "Returns" },
         ];
         break;
       default:
@@ -78,7 +80,6 @@ const MainLayout = ({ children }) => {
         <div className="p-4 border-b">
           <h2 className="text-xl font-bold text-indigo-600">
             Sathira Sweet puka2 and ata
-            
           </h2>
         </div>
         <nav className="flex-1 overflow-y-auto p-4">
@@ -167,4 +168,4 @@ const MainLayout = ({ children }) => {
   );
 };
 
-export default MainLayout; // This is the crucial line that was missing
+export default MainLayout;

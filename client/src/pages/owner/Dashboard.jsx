@@ -1,9 +1,10 @@
 // client/src/pages/owner/Dashboard.jsx
+import React, { useState, useEffect } from "react";
 import { dashboardService } from "../../services/dashboardService";
 import { reportService } from "../../services/reportService";
 import { useWebSocket } from "../../contexts/WebSocketContext";
 
-import React, { useState, useEffect } from "react";
+// UI Components
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -20,8 +21,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Loader } from "@/components/common/Loader";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+// Date utilities and icons
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
+
+// Chart components
 import {
   LineChart,
   Line,
@@ -37,10 +44,6 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import { dashboardService } from "../../services/dashboardService";
-import { reportService } from "../../services/reportService";
-import { Loader } from "@/components/common/Loader";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const OwnerDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);

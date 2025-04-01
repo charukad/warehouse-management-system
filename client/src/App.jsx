@@ -1,4 +1,4 @@
-// client/src/App.jsx
+// Updated App.jsx with additional routes for owner paths
 
 import React from "react";
 import {
@@ -29,6 +29,9 @@ import SalesmanInventory from "./pages/salesman/Inventory";
 import ShopOrders from "./pages/shop/Orders";
 import ShopReturns from "./pages/shop/Returns";
 import ShopProfile from "./pages/shop/Profile";
+import OwnerDashboard from "./pages/owner/Dashboard";
+import AdvancedAnalytics from "./pages/owner/AdvancedAnalytics";
+import ShopsMap from "./pages/owner/ShopsMap";
 
 import ProtectedRoute from "./components/common/ProtectedRoute";
 
@@ -78,6 +81,56 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["owner"]}>
                     <ProductManagement />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Additional owner routes with "owner/" prefix */}
+              <Route
+                path="/owner/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["owner"]}>
+                    <OwnerDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/owner/reports"
+                element={
+                  <ProtectedRoute allowedRoles={["owner"]}>
+                    <Reports />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/owner/users"
+                element={
+                  <ProtectedRoute allowedRoles={["owner"]}>
+                    <UserManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/owner/products"
+                element={
+                  <ProtectedRoute allowedRoles={["owner"]}>
+                    <ProductManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/owner/advanced-analytics"
+                element={
+                  <ProtectedRoute allowedRoles={["owner"]}>
+                    <AdvancedAnalytics />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/owner/shops-map"
+                element={
+                  <ProtectedRoute allowedRoles={["owner"]}>
+                    <ShopsMap />
                   </ProtectedRoute>
                 }
               />
@@ -170,7 +223,7 @@ function App() {
             </Route>
 
             {/* 404 Route */}
-
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </UIProvider>
       </AuthProvider>
