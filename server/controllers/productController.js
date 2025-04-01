@@ -149,33 +149,30 @@ const getProductById = async (req, res, next) => {
   }
 };
 
-// Create product - accessible to owner only
+// Create product - accessible to owner only - WITHOUT TRANSACTIONS
 const createProduct = async (req, res, next) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     const {
-      product_name,
-      product_code,
-      product_type,
-      retail_price,
-      wholesale_price,
+      name,
+      productCode,
+      productType,
+      retailPrice,
+      wholesalePrice,
       description,
-      min_stock_level,
-      image_url,
+      minStockLevel,
+      image,
       // In-house product fields
-      production_cost,
-      production_details,
-      recipe_id,
+      productionCost,
+      productionDetails,
+      recipeId,
       // Third-party product fields
-      supplier_id,
-      purchase_price,
-      supplier_product_code,
+      supplier,
+      purchasePrice,
+      supplierProductCode,
     } = req.body;
 
     // Validate required fields based on product type
-    if (product_type === "in-house" && !production_cost) {
+    if (productType === "in-house" && !productionCost) {
       return ApiResponse.error(
         res,
         "Production cost is required for in-house products",
@@ -183,7 +180,7 @@ const createProduct = async (req, res, next) => {
       );
     }
 
-    if (product_type === "third-party" && (!supplier_id || !purchase_price)) {
+    if (productType === "third-party" && (!supplier || !purchasePrice)) {
       return ApiResponse.error(
         res,
         "Supplier ID and purchase price are required for third-party products",
@@ -192,56 +189,55 @@ const createProduct = async (req, res, next) => {
     }
 
     // Check if product code already exists
-    const existingProduct = await Product.findOne({ product_code });
+    const existingProduct = await Product.findOne({ productCode });
     if (existingProduct) {
       return ApiResponse.error(res, "Product code already exists", 400);
     }
 
     // Create new product
     const product = new Product({
-      product_name,
-      product_code,
-      product_type,
-      retail_price,
-      wholesale_price,
+      name,
+      productCode,
+      productType,
+      retailPrice,
+      wholesalePrice,
       description,
-      min_stock_level,
-      image_url,
+      minStockLevel,
+      image,
       created_by: req.user.id,
     });
 
-    await product.save({ session });
+    await product.save();
 
     // Create type-specific product details
-    if (product_type === "in-house") {
+    if (productType === "in-house") {
       const inHouseProduct = new InHouseProduct({
         product: product._id,
-        production_cost,
-        production_details,
-        recipe_id,
+        productionCost,
+        productionDetails,
+        recipeId,
       });
 
-      await inHouseProduct.save({ session });
-    } else if (product_type === "third-party") {
+      await inHouseProduct.save();
+    } else if (productType === "third-party") {
       // Check if supplier exists
-      const supplier = await Supplier.findById(supplier_id);
-      if (!supplier) {
-        await session.abortTransaction();
+      const supplierExists = await Supplier.findById(supplier);
+      if (!supplierExists) {
+        // If supplier doesn't exist, delete the product we just created
+        await Product.findByIdAndDelete(product._id);
         return ApiResponse.notFound(res, "Supplier not found");
       }
 
       const thirdPartyProduct = new ThirdPartyProduct({
         product: product._id,
-        supplier: supplier_id,
-        purchase_price,
-        supplier_product_code,
+        supplier,
+        purchasePrice,
+        supplierProductCode,
         first_stocked: new Date(),
       });
 
-      await thirdPartyProduct.save({ session });
+      await thirdPartyProduct.save();
     }
-
-    await session.commitTransaction();
 
     // Retrieve the product with its type-specific details
     const newProduct = await getProductWithDetails(product._id);
@@ -253,10 +249,7 @@ const createProduct = async (req, res, next) => {
       201
     );
   } catch (error) {
-    await session.abortTransaction();
     next(error);
-  } finally {
-    session.endSession();
   }
 };
 
@@ -289,11 +282,8 @@ const getProductWithDetails = async (productId) => {
   return productDetails;
 };
 
-// Update product - accessible to owner only
+// Update product - accessible to owner only - WITHOUT TRANSACTIONS
 const updateProduct = async (req, res, next) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -310,7 +300,6 @@ const updateProduct = async (req, res, next) => {
       updateData.product_type &&
       updateData.product_type !== product.product_type
     ) {
-      await session.abortTransaction();
       return ApiResponse.error(res, "Product type cannot be changed", 400);
     }
 
@@ -318,7 +307,7 @@ const updateProduct = async (req, res, next) => {
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
       { $set: updateData },
-      { new: true, runValidators: true, session }
+      { new: true, runValidators: true }
     );
 
     // Update type-specific product details
@@ -326,7 +315,7 @@ const updateProduct = async (req, res, next) => {
       await InHouseProduct.findOneAndUpdate(
         { product: product._id },
         { $set: updateData.productionDetails },
-        { new: true, runValidators: true, upsert: true, session }
+        { new: true, runValidators: true, upsert: true }
       );
     } else if (
       product.product_type === "third-party" &&
@@ -342,7 +331,6 @@ const updateProduct = async (req, res, next) => {
           updateData.supplierDetails.supplier
         );
         if (!supplier) {
-          await session.abortTransaction();
           return ApiResponse.notFound(res, "Supplier not found");
         }
       }
@@ -350,11 +338,9 @@ const updateProduct = async (req, res, next) => {
       await ThirdPartyProduct.findOneAndUpdate(
         { product: product._id },
         { $set: updateData.supplierDetails },
-        { new: true, runValidators: true, upsert: true, session }
+        { new: true, runValidators: true, upsert: true }
       );
     }
-
-    await session.commitTransaction();
 
     // Retrieve the updated product with its type-specific details
     const productWithDetails = await getProductWithDetails(id);
@@ -367,10 +353,7 @@ const updateProduct = async (req, res, next) => {
       "Product updated successfully"
     );
   } catch (error) {
-    await session.abortTransaction();
     next(error);
-  } finally {
-    session.endSession();
   }
 };
 

@@ -192,7 +192,7 @@ const GlobalSearch = () => {
                     >
                       <div className="font-medium">{product.product_name}</div>
                       <div className="text-sm text-gray-500">
-                        {product.product_code} - ₹{product.retail_price}
+                        {product.product_code} - LKR{product.retail_price}
                       </div>
                     </div>
                   ))}
@@ -234,7 +234,7 @@ const GlobalSearch = () => {
                         Order #{order.reference_number}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {new Date(order.order_date).toLocaleDateString()} - ₹
+                        {new Date(order.order_date).toLocaleDateString()} -
                         {order.total_amount}
                       </div>
                     </div>

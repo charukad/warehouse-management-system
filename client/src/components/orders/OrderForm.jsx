@@ -246,7 +246,7 @@ const OrderForm = () => {
                     Total
                   </label>
                   <span className="font-medium">
-                    ₹{(item.quantity * item.unit_price).toFixed(2)}
+                    LKR{(item.quantity * item.unit_price).toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -257,7 +257,7 @@ const OrderForm = () => {
             <div className="text-right">
               <span className="text-sm text-gray-500">Order Total:</span>
               <div className="text-xl font-bold">
-                ₹{calculateTotal().toFixed(2)}
+                LKR{calculateTotal().toFixed(2)}
               </div>
             </div>
           </div>

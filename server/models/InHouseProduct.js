@@ -13,6 +13,14 @@ const InHouseProductSchema = new mongoose.Schema(
       required: [true, "Production cost is required"],
       min: [0, "Production cost cannot be negative"],
     },
+    productionDetails: {
+      type: String,
+      trim: true,
+    },
+    recipeId: {
+      type: String,
+      trim: true,
+    },
     ingredients: {
       type: [String],
       default: [],
@@ -24,10 +32,6 @@ const InHouseProductSchema = new mongoose.Schema(
     batchSize: {
       type: Number,
       default: 1,
-    },
-    recipeDetails: {
-      type: String,
-      trim: true,
     },
     shelfLife: {
       type: Number, // in days

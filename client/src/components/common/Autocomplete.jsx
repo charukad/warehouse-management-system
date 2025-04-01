@@ -101,7 +101,7 @@ const Autocomplete = ({ entity, onSelect, placeholder }) => {
               <div className="font-medium">{item.product_name}</div>
               <div className="text-xs text-gray-500">{item.product_code}</div>
             </div>
-            <div className="text-sm">₹{item.retail_price}</div>
+            <div className="text-sm">LKR{item.retail_price}</div>
           </div>
         );
 

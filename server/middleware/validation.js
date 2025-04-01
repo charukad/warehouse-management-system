@@ -103,52 +103,46 @@ const validateUpdateUser = [
     .withMessage("Invalid user role"),
 ];
 
-// Product validation rules
+// Product validation rules - UPDATED TO USE CAMELCASE
 const validateProduct = [
-  body("product_name")
-    .notEmpty()
-    .withMessage("Product name is required")
-    .trim(),
+  body("name").notEmpty().withMessage("Product name is required").trim(),
 
-  body("product_code")
-    .notEmpty()
-    .withMessage("Product code is required")
-    .trim(),
+  body("productCode").notEmpty().withMessage("Product code is required").trim(),
 
-  body("product_type")
+  body("productType")
     .notEmpty()
     .withMessage("Product type is required")
     .isIn(["in-house", "third-party"])
     .withMessage("Product type must be either 'in-house' or 'third-party'"),
 
-  body("retail_price")
+  body("retailPrice")
     .notEmpty()
     .withMessage("Retail price is required")
     .isFloat({ min: 0 })
     .withMessage("Retail price must be a positive number"),
 
-  body("wholesale_price")
+  body("wholesalePrice")
     .notEmpty()
     .withMessage("Wholesale price is required")
     .isFloat({ min: 0 })
     .withMessage("Wholesale price must be a positive number"),
 
   // Conditional validation for in-house products
-  body("production_cost")
-    .if(body("product_type").equals("in-house"))
+  body("productionCost")
+    .if(body("productType").equals("in-house"))
     .notEmpty()
     .withMessage("Production cost is required for in-house products")
     .isFloat({ min: 0 })
     .withMessage("Production cost must be a positive number"),
 
   // Conditional validation for third-party products
-  body("supplier_id")
-    .if(body("product_type").equals("third-party"))
+  body("supplier")
+    .if(body("productType").equals("third-party"))
     .notEmpty()
     .withMessage("Supplier ID is required for third-party products"),
 
-  body("purchase_price")
-    .if(body("product_type").equals("third-party"))
+  body("purchasePrice")
+    .if(body("productType").equals("third-party"))
     .notEmpty()
     .withMessage("Purchase price is required for third-party products")
     .isFloat({ min: 0 })

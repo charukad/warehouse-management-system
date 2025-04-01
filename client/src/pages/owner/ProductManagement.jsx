@@ -4,15 +4,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { Alert } from "../../components/ui/alert";
 import ProductFilters from "../../components/common/ProductFilters";
 import { productService } from "../../services/productService";
-// Optional: import axios directly for testing
-import axios from "axios";
-// Import actions when ready to implement Redux fully
-// import { fetchProducts, createProduct, updateProduct, deleteProduct } from '../../store/slices/productSlice';
 
 const ProductManagement = () => {
   const dispatch = useDispatch();
-  // This would use Redux state once implemented
-  // const { products, loading, error } = useSelector((state) => state.products);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -43,9 +37,8 @@ const ProductManagement = () => {
     supplier_product_code: "",
   });
 
-  // This would fetch products when the component mounts
+  // Fetch products when the component mounts
   useEffect(() => {
-    // Fetch products from the API
     const fetchProductsList = async () => {
       try {
         setLoading(true);
@@ -68,48 +61,46 @@ const ProductManagement = () => {
     };
 
     fetchProductsList();
-    // Once you have implemented the product slice with thunks:
-    // dispatch(fetchProducts());
   }, [dispatch]);
 
   // For now, we'll use dummy data until the API is connected
   const dummyProducts = [
     {
       _id: "1",
-      product_name: "Sweet Treat A",
-      product_code: "STA001",
-      product_type: "in-house",
-      retail_price: 250,
-      wholesale_price: 200,
-      production_cost: 150,
-      is_active: true,
-      min_stock_level: 50,
-      image_url: "/placeholder.png",
+      name: "Sweet Treat A",
+      productCode: "STA001",
+      productType: "in-house",
+      retailPrice: 250,
+      wholesalePrice: 200,
+      productionCost: 150,
+      isActive: true,
+      minStockLevel: 50,
+      image: "/placeholder.png",
     },
     {
       _id: "2",
-      product_name: "Sweet Treat B",
-      product_code: "STB002",
-      product_type: "in-house",
-      retail_price: 300,
-      wholesale_price: 240,
-      production_cost: 180,
-      is_active: true,
-      min_stock_level: 40,
-      image_url: "/placeholder.png",
+      name: "Sweet Treat B",
+      productCode: "STB002",
+      productType: "in-house",
+      retailPrice: 300,
+      wholesalePrice: 240,
+      productionCost: 180,
+      isActive: true,
+      minStockLevel: 40,
+      image: "/placeholder.png",
     },
     {
       _id: "3",
-      product_name: "Third Party Sweet",
-      product_code: "TPS003",
-      product_type: "third-party",
-      retail_price: 350,
-      wholesale_price: 290,
-      purchase_price: 220,
-      supplier_id: "supplier1",
-      is_active: true,
-      min_stock_level: 30,
-      image_url: "/placeholder.png",
+      name: "Third Party Sweet",
+      productCode: "TPS003",
+      productType: "third-party",
+      retailPrice: 350,
+      wholesalePrice: 290,
+      purchasePrice: 220,
+      supplier: "supplier1",
+      isActive: true,
+      minStockLevel: 30,
+      image: "/placeholder.png",
     },
   ];
 
@@ -117,7 +108,7 @@ const ProductManagement = () => {
   const filteredProducts =
     productType === "all"
       ? products
-      : products.filter((product) => product.product_type === productType);
+      : products.filter((product) => product.productType === productType);
 
   // Handle input change in form
   const handleInputChange = (e) => {
@@ -189,68 +180,31 @@ const ProductManagement = () => {
 
       // Prepare the data with CORRECT FIELD NAMES for the backend
       const productData = {
-        name: productForm.product_name, // Changed from product_name
-        productCode: productForm.product_code, // Changed from product_code
-        productType: productForm.product_type, // Changed from product_type
-        retailPrice: parseFloat(productForm.retail_price), // Changed from retail_price
-        wholesalePrice: parseFloat(productForm.wholesale_price), // Changed from wholesale_price
+        name: productForm.product_name,
+        productCode: productForm.product_code,
+        productType: productForm.product_type,
+        retailPrice: parseFloat(productForm.retail_price),
+        wholesalePrice: parseFloat(productForm.wholesale_price),
         description: productForm.description,
-        minStockLevel: parseInt(productForm.min_stock_level), // Changed from min_stock_level
-        image: productForm.image_url || "default-product.jpg", // Changed from image_url
+        minStockLevel: parseInt(productForm.min_stock_level),
+        image: productForm.image_url || "default-product.jpg",
       };
 
       // Add type-specific fields
       if (productForm.product_type === "in-house") {
-        productData.productionCost = parseFloat(productForm.production_cost); // Changed from production_cost
-        productData.productionDetails = productForm.production_details; // Changed from production_details
-        productData.recipeId = productForm.recipe_id; // Changed from recipe_id
+        productData.productionCost = parseFloat(productForm.production_cost);
+        productData.productionDetails = productForm.production_details;
+        productData.recipeId = productForm.recipe_id;
       } else if (productForm.product_type === "third-party") {
-        productData.supplier = productForm.supplier_id; // Changed from supplier_id
-        productData.purchasePrice = parseFloat(productForm.purchase_price); // Changed from purchase_price
-        productData.supplierProductCode = productForm.supplier_product_code; // Changed from supplier_product_code
+        productData.supplier = productForm.supplier_id;
+        productData.purchasePrice = parseFloat(productForm.purchase_price);
+        productData.supplierProductCode = productForm.supplier_product_code;
       }
 
       console.log("Creating product with data:", productData);
 
-      // Try direct API call to debug issues
-      let response;
-
-      // METHOD 1: Using our service (uncomment one of these methods)
-      response = await productService.createProduct(productData);
+      const response = await productService.createProduct(productData);
       console.log("Service method response:", response);
-
-      // METHOD 2: Direct axios call to bypass service layer
-      /*
-      const token = localStorage.getItem('token');
-      console.log("Using token:", token ? "Token exists" : "No token found");
-      
-      response = await axios.post(
-        'http://localhost:5008/api/products', 
-        productData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      console.log("Direct axios response:", response);
-      */
-
-      // METHOD 3: Minimal data test
-      /*
-      const minimalProduct = {
-        name: "Test Product Minimal",
-        productCode: "TEST" + Date.now().toString().slice(-4),
-        productType: "in-house",
-        retailPrice: 100,
-        wholesalePrice: 80,
-        productionCost: 50
-      };
-      
-      response = await productService.createProduct(minimalProduct);
-      console.log("Minimal product response:", response);
-      */
 
       // If successful, add to our local state
       if (response && response.data) {
@@ -259,7 +213,7 @@ const ProductManagement = () => {
           response.data || {
             _id: `new-${Date.now()}`,
             ...productData,
-            is_active: true,
+            isActive: true,
           };
 
         setProducts([newProduct, ...products]);
@@ -410,48 +364,48 @@ const ProductManagement = () => {
                           <div className="flex-shrink-0 h-10 w-10">
                             <img
                               className="h-10 w-10 rounded-full"
-                              src={product.image_url}
-                              alt={product.product_name}
+                              src={product.image || "/placeholder.png"}
+                              alt={product.name}
                             />
                           </div>
                           <div className="ml-4">
                             <div className="font-medium text-gray-900">
-                              {product.product_name}
+                              {product.name}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-gray-500">
-                          {product.product_code}
+                          {product.productCode}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                          {product.product_type === "in-house"
+                          {product.productType === "in-house"
                             ? "In-House"
                             : "Third-Party"}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-gray-500">
-                          ₹{product.retail_price}
+                          LKR {product.retailPrice}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-gray-500">
-                          ₹{product.wholesale_price}
+                          LKR {product.wholesalePrice}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            product.is_active
+                            product.isActive
                               ? "bg-green-100 text-green-800"
                               : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {product.is_active ? "Active" : "Inactive"}
+                          {product.isActive ? "Active" : "Inactive"}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
